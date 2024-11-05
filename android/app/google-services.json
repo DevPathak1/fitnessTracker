@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "142944585440",
+    "project_id": "fir-codelab-9a80b",
+    "storage_bucket": "fir-codelab-9a80b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142944585440:android:b6073aeebc8decdcb9f285",
+        "android_client_info": {
+          "package_name": "com.example.firecodelab"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAe15a1q7I623Ic8Vvzz7QZiM2Q1jo5l2M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142944585440:android:f8a0cde5273bbed3b9f285",
+        "android_client_info": {
+          "package_name": "com.example.fitnessTracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAe15a1q7I623Ic8Vvzz7QZiM2Q1jo5l2M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
