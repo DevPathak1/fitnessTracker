@@ -47,6 +47,7 @@ app.*.map.json
 # run `flutterfire configure` to configure, see readme
 firebase.json
 /lib/firebase_options.dart
+/android/app/google-services.json
 
 # Dev related
 devtools_options.yaml
