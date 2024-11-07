@@ -24,7 +24,7 @@ void _handleAuthStateChange(BuildContext context, AuthState state) {
         user.uid, username, 18, 180, 70); // TODO: let user input its data
   } else {
     // existing user
-    userProvider.get(user.uid);
+    userProvider.fetchUser(user.uid);
   }
 
   if (!user.emailVerified) {

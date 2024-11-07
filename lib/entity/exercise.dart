@@ -8,24 +8,23 @@ class Exercise {
   Exercise(this.name, this.type, this.sets);
   Exercise.init(this.name, this.type, int nSets, int reps, double weight)
       : sets = List.generate(nSets, (_) => ExerciseSet(reps, weight));
+  Exercise.fromMap(this.name, this.type, List<Map<String, dynamic>> setMaps)
+      : sets = List.generate(setMaps.length,
+            (i) => ExerciseSet(setMaps[i]['reps'], setMaps[i]['weight']));
 
   factory Exercise.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
     SnapshotOptions? options,
   ) {
-    final data = snapshot.data();
-    return Exercise(
-        data?['name'],
-        data?['type'],
-        List.generate(data?['sets'].length ?? 0,
-            (i) => ExerciseSet(data!['sets'][i].reps, data['sets'][i].weight)));
+    final data = snapshot.data()!;
+    return Exercise.fromMap(data['name'], data['type'], data['sets']);
   }
 
   Map<String, dynamic> toFirestore() {
     return {
       'name': name,
       if (type != null) 'type': type,
-      'sets': sets,
+      'sets': List.generate(sets.length, (i) => sets[i].toMap()),
     };
   }
 }
@@ -35,4 +34,8 @@ class ExerciseSet {
   final double weight;
 
   ExerciseSet(this.reps, this.weight);
+
+  Map<String, dynamic> toMap() {
+    return {'reps': reps, 'weight': weight};
+  }
 }
