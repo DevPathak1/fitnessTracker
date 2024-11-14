@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'exercise.dart';
+import 'session.dart';
 
-class WorkoutSession {
-  final String userId; // ref(User)
+class WorkoutSession extends Session {
   final Timestamp startTime;
   final Timestamp endTime;
-  final List<Exercise> exercises;
 
-  WorkoutSession(this.userId, this.startTime, this.endTime, this.exercises);
+  WorkoutSession(String userId, this.startTime, this.endTime,
+      List<Map<String, dynamic>> exercises)
+      : super(userId, exercises);
 
   factory WorkoutSession.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
@@ -15,13 +15,7 @@ class WorkoutSession {
   ) {
     final data = snapshot.data()!;
     return WorkoutSession(
-        data['userId'],
-        data['startTime'],
-        data['endTime'],
-        List.generate(
-            data['exercises'].length,
-            (i) => Exercise.fromMap(data['exercises'][i]['name'],
-                data['exercises'][i]['type'], data['exercises'][i]['sets'])));
+        data['userId'], data['startTime'], data['endTime'], data['exercises']);
   }
 
   Map<String, dynamic> toFirestore() {
@@ -29,8 +23,7 @@ class WorkoutSession {
       'userId': userId,
       'startTime': startTime,
       'endTime': endTime,
-      'exercises':
-          List.generate(exercises.length, (i) => exercises[i].toFirestore())
+      'exercises': exerciseList,
     };
   }
 }

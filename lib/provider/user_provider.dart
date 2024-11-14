@@ -3,15 +3,22 @@ import 'package:flutter/material.dart';
 
 import 'package:fitness_tracker/entity/user.dart';
 import 'package:fitness_tracker/entity/workout_session.dart';
+import 'package:fitness_tracker/entity/routine.dart';
 
 class UserProvider extends ChangeNotifier {
   final _db = FirebaseFirestore.instance;
   User? _user;
   User? get user => _user;
+  String? get name => _user?.name;
+  int? get age => _user?.age;
+  double? get height => _user?.height;
+  double? get weight => _user?.weight;
   DocumentReference<dynamic>? _userRef;
   DocumentReference<dynamic>? get userRef => _userRef;
   final _lastSessions = <WorkoutSession>[];
   List<WorkoutSession> get lastSessions => _lastSessions;
+  final _routines = <Routine>[];
+  List<Routine> get routines => _routines;
 
   Future<int> create(
       String userId, String name, int age, double height, double weight) async {
@@ -42,11 +49,11 @@ class UserProvider extends ChangeNotifier {
     _user = (await _userRef!.get()).data();
     print('got user: ${_user?.toFirestore()}');
     if (_user == null) return -1;
-    await fetchLastSessions();
+    await _fetchLastSessions();
     return 0;
   }
 
-  Future<int> fetchLastSessions() async {
+  Future<int> _fetchLastSessions() async {
     if (_user == null) {
       return 1;
     }
