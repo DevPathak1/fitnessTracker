@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitness_tracker/entity/exercise.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fitness_tracker/entity/user.dart';
@@ -97,5 +98,60 @@ class UserProvider extends ChangeNotifier {
             .get())
         .docs;
     return _allSessions = List.generate(docs.length, (i) => docs[i].data());
+  }
+
+  Future<List<Routine>> getRoutines() async {
+    assert(_user != null, 'User is not initialized');
+    if (_routines.length == _user!.routines.length) {
+      return _routines;
+    }
+    for (final routineRef in _user!.routines) {
+      final data = (await _db
+              .collection('routine')
+              .withConverter(
+                  fromFirestore: Routine.fromFirestore,
+                  toFirestore: (Routine routine, options) =>
+                      routine.toFirestore())
+              .doc(routineRef)
+              .get())
+          .data();
+      if (data != null) {
+        _routines.add(data);
+      } else {
+        print('cannot get routine');
+        // TODO: remove unreached docs from user
+      }
+    }
+    return _routines;
+  }
+
+  Future<WorkoutSession> addWorkoutSession(
+      Timestamp start, Timestamp end, List<Exercise> exercises) async {
+    assert(_userRef != null, 'User is not initialized');
+    final session = WorkoutSession(_userRef!.id, start, end, exercises);
+    _lastSessions.add(session);
+    if (_allSessions != null) {
+      _allSessions!.add(session);
+    }
+    final sessionRef = await _db
+        .collection('workout_session')
+        .withConverter(
+            fromFirestore: WorkoutSession.fromFirestore,
+            toFirestore: (WorkoutSession session, options) =>
+                session.toFirestore())
+        .add(session);
+    if (_user!.lastWorkoutSessions.length == 10) {
+      _user!.lastWorkoutSessions.removeAt(0);
+      _user!.lastWorkoutSessions.add(sessionRef.id);
+      await userRef!.update({
+        'lastWorkoutSessions': _user!.lastWorkoutSessions,
+      });
+    } else {
+      _user!.lastWorkoutSessions.add(sessionRef.id);
+      await userRef!.update({
+        'lastWorkoutSessions': FieldValue.arrayUnion([sessionRef.id]),
+      });
+    }
+    return session;
   }
 }
