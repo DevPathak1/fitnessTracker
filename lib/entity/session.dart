@@ -1,7 +1,9 @@
 import 'exercise.dart';
 
 abstract class Session {
-  final String _userId; // ref(User)
+  final String _userId;
+
+  /// ref(User)
   String get userId => _userId;
   final List<Exercise> exercises;
   List<Map<String, dynamic>> get exerciseList =>

@@ -17,9 +17,11 @@ class AuthProvider extends ChangeNotifier {
 
   bool _loggedIn = false;
   bool get loggedIn => _loggedIn;
+  FirebaseApp? _firebaseApp;
+  bool get isInited => _firebaseApp != null;
 
   Future<void> init() async {
-    await Firebase.initializeApp(
+    _firebaseApp = await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
 
     FirebaseUIAuth.configureProviders([

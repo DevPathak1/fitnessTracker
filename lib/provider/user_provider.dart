@@ -17,6 +17,7 @@ class UserProvider extends ChangeNotifier {
   DocumentReference<dynamic>? get userRef => _userRef;
   final _lastSessions = <WorkoutSession>[];
   List<WorkoutSession> get lastSessions => _lastSessions;
+  List<WorkoutSession>? _allSessions;
   final _routines = <Routine>[];
   List<Routine> get routines => _routines;
 
@@ -77,5 +78,24 @@ class UserProvider extends ChangeNotifier {
     print('got sessions: $_lastSessions');
     notifyListeners();
     return result;
+  }
+
+  /// get all workout sessions
+  Future<List<WorkoutSession>> getAllSessions() async {
+    if (_allSessions != null) {
+      return _allSessions!;
+    }
+    assert(_userRef != null, 'User is not initialized');
+
+    final docs = (await _db
+            .collection('workout_session')
+            .withConverter(
+                fromFirestore: WorkoutSession.fromFirestore,
+                toFirestore: (WorkoutSession session, options) =>
+                    session.toFirestore())
+            .where('userId', isEqualTo: _userRef!.id)
+            .get())
+        .docs;
+    return _allSessions = List.generate(docs.length, (i) => docs[i].data());
   }
 }

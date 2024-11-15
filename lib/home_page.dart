@@ -5,13 +5,30 @@ import 'package:firebase_auth/firebase_auth.dart'
     hide EmailAuthProvider, PhoneAuthProvider, AuthProvider;
 
 import 'provider/auth_provider.dart';
+import 'provider/user_provider.dart';
 import 'widget/authentication.dart';
+import 'widget/wait_firebase_init.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool _redirected = false;
+
+  @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    print("logged in: ${authProvider.loggedIn}");
+    if (!authProvider.loggedIn && !_redirected) {
+      _redirected = true;
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => context.push('/sign_in'));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -22,21 +39,25 @@ class HomePage extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
-          Consumer<AuthProvider>(
-            builder: _authBuilder,
+          AuthFunc(
+              loggedIn: authProvider.loggedIn,
+              signOut: () {
+                FirebaseAuth.instance.signOut();
+                _redirected = false;
+              }),
+          WaitFirebaseInit(
+            child: Consumer<UserProvider>(
+              builder: _userInfoBuilder,
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  AuthFunc _authBuilder(BuildContext context, AuthProvider appState, _) {
-    print("logged in: ${appState.loggedIn}");
-    if (!appState.loggedIn) context.push('/sign_in');
-    return AuthFunc(
-        loggedIn: appState.loggedIn,
-        signOut: () {
-          FirebaseAuth.instance.signOut();
-        });
-  }
+/// TODO: testing widget to be remove in pord
+Text _userInfoBuilder(BuildContext context, UserProvider userProvider, _) {
+  return Text(
+      userProvider.user?.toFirestore().toString() ?? 'User not initialized');
 }

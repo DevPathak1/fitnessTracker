@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'home_page.dart';
 import 'provider/user_provider.dart';
+import 'widget/wait_firebase_init.dart';
 
 void _handleAuthStateChange(BuildContext context, AuthState state) {
   final user = switch (state) {
@@ -47,19 +48,21 @@ final router = GoRouter(
         GoRoute(
           path: 'sign_in',
           builder: (context, state) {
-            return SignInScreen(
-              actions: [
-                ForgotPasswordAction(((context, email) {
-                  final uri = Uri(
-                    path: '/sign_in/forgot_password',
-                    queryParameters: <String, String?>{
-                      'email': email,
-                    },
-                  );
-                  context.push(uri.toString());
-                })),
-                AuthStateChangeAction(_handleAuthStateChange),
-              ],
+            return WaitFirebaseInit(
+              child: SignInScreen(
+                actions: [
+                  ForgotPasswordAction(((context, email) {
+                    final uri = Uri(
+                      path: '/sign_in/forgot_password',
+                      queryParameters: <String, String?>{
+                        'email': email,
+                      },
+                    );
+                    context.push(uri.toString());
+                  })),
+                  AuthStateChangeAction(_handleAuthStateChange),
+                ],
+              ),
             );
           },
           routes: [

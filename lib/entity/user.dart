@@ -6,9 +6,12 @@ class User {
   final int age;
   final double height;
   final double weight;
-  final List<String>
-      lastWorkoutSessions; // ref(WorkoutSession) [old..new].length <= 10
-  final List<String> routines; // ref(Routine)
+
+  /// ref(WorkoutSession) [old..new].length <= 10
+  final List<String> lastWorkoutSessions;
+
+  /// ref(Routine)
+  final List<String> routines;
   final List<Exercise> savedExercises;
 
   User(this.name, this.age, this.height, this.weight)
