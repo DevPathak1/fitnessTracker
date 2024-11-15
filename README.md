@@ -14,8 +14,16 @@ flutter pub get
 flutterfire configure
 ```
 
+## Done
+1. [Authentication](lib/provider/auth_provider.dart)
+2. [Entities](lib/entity/) to be stored in db
+
 ## TODO
-The user apis are [here](lib/provider/user_provider.dart). Please use `Consumer<UserProvider>()` or `Provider.of<UserProvider>()` to access the state. James and I will continue to work on the backend.
+- [Controllers](lib/provider/user_provider.dart) interacting with db: Jack is working
+- frontend: Adhithyaa and James please do
+  - include new pages in [Router](lib/router.dart)
+  - you can create a page folder for pages
+
 
 ## Tutorial
 - [Dart](https://dart.dev/language)
