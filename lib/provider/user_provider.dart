@@ -154,4 +154,20 @@ class UserProvider extends ChangeNotifier {
     }
     return session;
   }
+
+  Future<Routine> addRoutine(String name, List<Exercise> exercises) async {
+    assert(_userRef != null, 'User is not initialized');
+    final routine = Routine(userRef!.id, name, exercises);
+    _routines.add(routine);
+    final routineRef = await _db
+        .collection('routine')
+        .withConverter(
+            fromFirestore: Routine.fromFirestore,
+            toFirestore: (Routine routine, options) => routine.toFirestore())
+        .add(routine);
+    await userRef!.update({
+      'routines': FieldValue.arrayUnion([routineRef.id]),
+    });
+    return routine;
+  }
 }
