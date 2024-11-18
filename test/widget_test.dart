@@ -18,14 +18,19 @@ void main() {
   testWidgets('main test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     // await tester.pumpWidget(const App());
+    print('starting test');
     await testdb();
   });
 }
 
 Future<void> testdb() async {
   const userId = 'wpooKB2P7GSitzppjjw8P75iv4v1';
+  print('starting testdb');
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('inited firebase');
   final userProvider = UserProvider();
   await userProvider.fetchUser(userId);
+  print('got user');
+  expect(userProvider.id, userId);
   print(userProvider.user?.toFirestore().toString());
 }

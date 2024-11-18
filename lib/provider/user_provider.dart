@@ -15,7 +15,7 @@ class UserProvider extends ChangeNotifier {
   double? get height => _user?.height;
   double? get weight => _user?.weight;
   DocumentReference<dynamic>? _userRef;
-  DocumentReference<dynamic>? get userRef => _userRef;
+  String? get id => _userRef?.id;
   final _lastSessions = <WorkoutSession>[];
   List<WorkoutSession> get lastSessions => _lastSessions;
   List<WorkoutSession>? _allSessions;
@@ -143,12 +143,12 @@ class UserProvider extends ChangeNotifier {
     if (_user!.lastWorkoutSessions.length == 10) {
       _user!.lastWorkoutSessions.removeAt(0);
       _user!.lastWorkoutSessions.add(sessionRef.id);
-      await userRef!.update({
+      await _userRef!.update({
         'lastWorkoutSessions': _user!.lastWorkoutSessions,
       });
     } else {
       _user!.lastWorkoutSessions.add(sessionRef.id);
-      await userRef!.update({
+      await _userRef!.update({
         'lastWorkoutSessions': FieldValue.arrayUnion([sessionRef.id]),
       });
     }
@@ -157,7 +157,7 @@ class UserProvider extends ChangeNotifier {
 
   Future<Routine> addRoutine(String name, List<Exercise> exercises) async {
     assert(_userRef != null, 'User is not initialized');
-    final routine = Routine(userRef!.id, name, exercises);
+    final routine = Routine(_userRef!.id, name, exercises);
     _routines.add(routine);
     final routineRef = await _db
         .collection('routine')
@@ -165,7 +165,7 @@ class UserProvider extends ChangeNotifier {
             fromFirestore: Routine.fromFirestore,
             toFirestore: (Routine routine, options) => routine.toFirestore())
         .add(routine);
-    await userRef!.update({
+    await _userRef!.update({
       'routines': FieldValue.arrayUnion([routineRef.id]),
     });
     return routine;
