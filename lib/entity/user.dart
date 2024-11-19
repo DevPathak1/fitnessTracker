@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'exercise.dart';
 
+/// User document stored in Firestore
 class User {
   final String name;
   final int age;

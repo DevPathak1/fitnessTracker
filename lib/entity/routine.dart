@@ -7,8 +7,7 @@ class Routine extends Session {
 
   Routine(String userId, this.name, List<Exercise> exercises)
       : super(userId, exercises);
-  Routine.fromMap(
-      String userId, this.name, List<Map<String, dynamic>> exercises)
+  Routine.fromMap(String userId, this.name, List<dynamic> exercises)
       : super.fromMap(userId, exercises);
 
   factory Routine.fromFirestore(
@@ -26,4 +25,7 @@ class Routine extends Session {
       'exercises': exerciseList,
     };
   }
+
+  @override
+  String toString() => '\nRoutine(${toFirestore().toString()})';
 }

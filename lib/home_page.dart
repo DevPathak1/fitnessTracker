@@ -1,13 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart'
-    hide EmailAuthProvider, PhoneAuthProvider, AuthProvider;
+    hide EmailAuthProvider, PhoneAuthProvider, AuthProvider, User;
 
 import 'provider/auth_provider.dart';
 import 'provider/user_provider.dart';
 import 'widget/authentication.dart';
 import 'widget/wait_firebase_init.dart';
+import 'entity/user.dart';
+import 'entity/exercise.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,6 +21,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _redirected = false;
+  bool _gotRoutine = false;
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +58,49 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-}
 
-/// TODO: testing widget to be remove in pord
-Text _userInfoBuilder(BuildContext context, UserProvider userProvider, _) {
-  return Text(
-      userProvider.user?.toFirestore().toString() ?? 'User not initialized');
+  /// TODO: testing widget to be remove in pord
+  Widget _userInfoBuilder(BuildContext context, UserProvider userProvider, _) {
+    if (userProvider.user == null) {
+      return const Text('User is not initialized');
+    }
+    User user = userProvider.user!;
+    final exercises =
+        List.generate(1, (_) => Exercise.init('name', 'type', 1, 12, 50));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('User: ${user.toFirestore()}'),
+        OutlinedButton(
+          onPressed: () => userProvider.addWorkoutSession(
+              Timestamp.now(), Timestamp.now(), exercises),
+          child: const Text('add workout session'),
+        ),
+        Text('Workout sessions: ${userProvider.lastSessions}'),
+        Row(
+          children: [
+            Visibility(
+              visible: _gotRoutine,
+              child: OutlinedButton(
+                onPressed: () => userProvider.addRoutine('name', exercises),
+                child: const Text('add routine'),
+              ),
+            ),
+            Visibility(
+              visible: !_gotRoutine,
+              child: OutlinedButton(
+                onPressed: () {
+                  userProvider.getRoutines();
+                  _gotRoutine = true;
+                },
+                child: const Text('get routine'),
+              ),
+            ),
+          ],
+        ),
+        Text('Routines: ${userProvider.routines}'),
+      ],
+    );
+  }
 }

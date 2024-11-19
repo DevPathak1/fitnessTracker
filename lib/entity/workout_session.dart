@@ -9,8 +9,8 @@ class WorkoutSession extends Session {
   WorkoutSession(
       String userId, this.startTime, this.endTime, List<Exercise> exercises)
       : super(userId, exercises);
-  WorkoutSession.fromMap(String userId, this.startTime, this.endTime,
-      List<Map<String, dynamic>> exercises)
+  WorkoutSession.fromMap(
+      String userId, this.startTime, this.endTime, List<dynamic> exercises)
       : super.fromMap(userId, exercises);
 
   factory WorkoutSession.fromFirestore(
@@ -30,4 +30,7 @@ class WorkoutSession extends Session {
       'exercises': exerciseList,
     };
   }
+
+  @override
+  String toString() => '\nWorkoutSession(${toFirestore().toString()})';
 }

@@ -56,9 +56,6 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<int> _fetchLastSessions() async {
-    if (_user == null) {
-      return 1;
-    }
     var result = 0;
     for (final id in _user!.lastWorkoutSessions) {
       final sessionRef = _db
@@ -76,7 +73,6 @@ class UserProvider extends ChangeNotifier {
         print('unable to fetch session id: $id');
       }
     }
-    print('got sessions: $_lastSessions');
     notifyListeners();
     return result;
   }
@@ -97,7 +93,9 @@ class UserProvider extends ChangeNotifier {
             .where('userId', isEqualTo: _userRef!.id)
             .get())
         .docs;
-    return _allSessions = List.generate(docs.length, (i) => docs[i].data());
+    _allSessions = List.generate(docs.length, (i) => docs[i].data());
+    notifyListeners();
+    return _allSessions!;
   }
 
   Future<List<Routine>> getRoutines() async {
@@ -118,10 +116,11 @@ class UserProvider extends ChangeNotifier {
       if (data != null) {
         _routines.add(data);
       } else {
-        print('cannot get routine');
+        print('unable to fetch routine id: $routineRef');
         // TODO: remove unreached docs from user
       }
     }
+    notifyListeners();
     return _routines;
   }
 
@@ -133,6 +132,7 @@ class UserProvider extends ChangeNotifier {
     if (_allSessions != null) {
       _allSessions!.add(session);
     }
+    notifyListeners();
     final sessionRef = await _db
         .collection('workout_session')
         .withConverter(
@@ -159,6 +159,7 @@ class UserProvider extends ChangeNotifier {
     assert(_userRef != null, 'User is not initialized');
     final routine = Routine(_userRef!.id, name, exercises);
     _routines.add(routine);
+    notifyListeners();
     final routineRef = await _db
         .collection('routine')
         .withConverter(
