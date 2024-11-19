@@ -9,7 +9,8 @@ abstract class Session {
   List<Map<String, dynamic>> get exerciseList =>
       List.generate(exercises.length, (i) => exercises[i].toFirestore());
 
-  Session(this._userId, List<Map<String, dynamic>> exerciseMapList)
+  Session(this._userId, this.exercises);
+  Session.fromMap(this._userId, List<dynamic> exerciseMapList)
       : exercises = List.generate(
             exerciseMapList.length,
             (i) => Exercise.fromMap(exerciseMapList[i]['name'],

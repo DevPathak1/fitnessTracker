@@ -8,7 +8,7 @@ class Exercise {
   Exercise(this.name, this.type, this.sets);
   Exercise.init(this.name, this.type, int nSets, int reps, double weight)
       : sets = List.generate(nSets, (_) => ExerciseSet(reps, weight));
-  Exercise.fromMap(this.name, this.type, List<Map<String, dynamic>> setMaps)
+  Exercise.fromMap(this.name, this.type, List<dynamic> setMaps)
       : sets = List.generate(setMaps.length,
             (i) => ExerciseSet(setMaps[i]['reps'], setMaps[i]['weight']));
 

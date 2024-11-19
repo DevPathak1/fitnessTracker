@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitness_tracker/entity/exercise.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fitness_tracker/entity/user.dart';
@@ -14,7 +15,7 @@ class UserProvider extends ChangeNotifier {
   double? get height => _user?.height;
   double? get weight => _user?.weight;
   DocumentReference<dynamic>? _userRef;
-  DocumentReference<dynamic>? get userRef => _userRef;
+  String? get id => _userRef?.id;
   final _lastSessions = <WorkoutSession>[];
   List<WorkoutSession> get lastSessions => _lastSessions;
   List<WorkoutSession>? _allSessions;
@@ -55,9 +56,6 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<int> _fetchLastSessions() async {
-    if (_user == null) {
-      return 1;
-    }
     var result = 0;
     for (final id in _user!.lastWorkoutSessions) {
       final sessionRef = _db
@@ -75,7 +73,6 @@ class UserProvider extends ChangeNotifier {
         print('unable to fetch session id: $id');
       }
     }
-    print('got sessions: $_lastSessions');
     notifyListeners();
     return result;
   }
@@ -96,6 +93,82 @@ class UserProvider extends ChangeNotifier {
             .where('userId', isEqualTo: _userRef!.id)
             .get())
         .docs;
-    return _allSessions = List.generate(docs.length, (i) => docs[i].data());
+    _allSessions = List.generate(docs.length, (i) => docs[i].data());
+    notifyListeners();
+    return _allSessions!;
+  }
+
+  Future<List<Routine>> getRoutines() async {
+    assert(_user != null, 'User is not initialized');
+    if (_routines.length == _user!.routines.length) {
+      return _routines;
+    }
+    for (final routineRef in _user!.routines) {
+      final data = (await _db
+              .collection('routine')
+              .withConverter(
+                  fromFirestore: Routine.fromFirestore,
+                  toFirestore: (Routine routine, options) =>
+                      routine.toFirestore())
+              .doc(routineRef)
+              .get())
+          .data();
+      if (data != null) {
+        _routines.add(data);
+      } else {
+        print('unable to fetch routine id: $routineRef');
+        // TODO: remove unreached docs from user
+      }
+    }
+    notifyListeners();
+    return _routines;
+  }
+
+  Future<WorkoutSession> addWorkoutSession(
+      Timestamp start, Timestamp end, List<Exercise> exercises) async {
+    assert(_userRef != null, 'User is not initialized');
+    final session = WorkoutSession(_userRef!.id, start, end, exercises);
+    _lastSessions.add(session);
+    if (_allSessions != null) {
+      _allSessions!.add(session);
+    }
+    notifyListeners();
+    final sessionRef = await _db
+        .collection('workout_session')
+        .withConverter(
+            fromFirestore: WorkoutSession.fromFirestore,
+            toFirestore: (WorkoutSession session, options) =>
+                session.toFirestore())
+        .add(session);
+    if (_user!.lastWorkoutSessions.length == 10) {
+      _user!.lastWorkoutSessions.removeAt(0);
+      _user!.lastWorkoutSessions.add(sessionRef.id);
+      await _userRef!.update({
+        'lastWorkoutSessions': _user!.lastWorkoutSessions,
+      });
+    } else {
+      _user!.lastWorkoutSessions.add(sessionRef.id);
+      await _userRef!.update({
+        'lastWorkoutSessions': FieldValue.arrayUnion([sessionRef.id]),
+      });
+    }
+    return session;
+  }
+
+  Future<Routine> addRoutine(String name, List<Exercise> exercises) async {
+    assert(_userRef != null, 'User is not initialized');
+    final routine = Routine(_userRef!.id, name, exercises);
+    _routines.add(routine);
+    notifyListeners();
+    final routineRef = await _db
+        .collection('routine')
+        .withConverter(
+            fromFirestore: Routine.fromFirestore,
+            toFirestore: (Routine routine, options) => routine.toFirestore())
+        .add(routine);
+    await _userRef!.update({
+      'routines': FieldValue.arrayUnion([routineRef.id]),
+    });
+    return routine;
   }
 }
