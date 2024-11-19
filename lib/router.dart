@@ -4,6 +4,9 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:provider/provider.dart';
 
 import 'home_page.dart';
+import 'view_saved_workouts.dart'; // Add your new pages here
+import 'workout_session.dart';
+import 'view_workout_history.dart';
 import 'provider/user_provider.dart';
 import 'widget/wait_firebase_init.dart';
 
@@ -40,6 +43,7 @@ void _handleAuthStateChange(BuildContext context, AuthState state) {
 }
 
 final router = GoRouter(
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
@@ -91,6 +95,22 @@ final router = GoRouter(
             );
           },
         ),
+        // Registering all routes, ensuring no paths are commented out
+        GoRoute(
+          path: 'view_saved_workouts',
+          builder: (context, state) => const ViewSavedWorkoutsPage(),
+        ),
+        GoRoute(
+          path: 'workout_session',
+          builder: (context, state) => const WorkoutSessionPage(),
+        ),
+        // GoRoute(
+        //   path: 'view_workout_history',
+        //   builder: (context, state) => const ViewWorkoutHistoryPage(),
+        // ),
+        // GoRoute(
+        //   path: 'track_each_exercise',
+        //   builder: (context, state) => const TrackEachExercisePage(),
       ],
     ),
   ],

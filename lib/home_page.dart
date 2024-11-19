@@ -36,19 +36,35 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(color: Colors.white70),
         ),
         backgroundColor: Colors.black,
-      ),
-      body: ListView(
-        children: <Widget>[
+        actions: <Widget>[
           AuthFunc(
               loggedIn: authProvider.loggedIn,
               signOut: () {
                 FirebaseAuth.instance.signOut();
                 _redirected = false;
               }),
-          WaitFirebaseInit(
-            child: Consumer<UserProvider>(
-              builder: _userInfoBuilder,
-            ),
+        ],
+        iconTheme: const IconThemeData(color: Colors.white), 
+      ),
+      body: ListView(
+        children: <Widget>[
+          ElevatedButton(
+            onPressed: () {
+              context.push('/view_saved_workouts');
+            },
+            child: const Text('View Saved Workouts'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.push('/workout_session');
+            },
+            child: const Text('Start a Workout Session'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.push('/view_workout_history');
+            },
+            child: const Text('View Workout History'),
           ),
         ],
       ),

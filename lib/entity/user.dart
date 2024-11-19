@@ -22,24 +22,28 @@ class User {
       this.lastWorkoutSessions, this.routines, this.savedExercises);
 
   factory User.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> snapshot,
-    SnapshotOptions? options,
-  ) {
-    final data = snapshot.data()!;
-    return User._init(
-        data['name'],
-        data['age'],
-        data['height'],
-        data['weight'],
-        List.from(data['lastWorkoutSessions']),
-        List.from(data['routines']),
-        List.generate(
-            data['savedExercises'].length,
-            (i) => Exercise.fromMap(
-                data['savedExercises'][i]['name'],
-                data['savedExercises'][i]['type'],
-                data['savedExercises'][i]['sets'])));
-  }
+  DocumentSnapshot<Map<String, dynamic>> snapshot,
+  SnapshotOptions? options,
+) {
+  final data = snapshot.data()!;
+  return User._init(
+    data['name'],
+    data['age'],
+    (data['height'] is int ? data['height'].toDouble() : data['height']) ?? 0.0,
+    (data['weight'] is int ? data['weight'].toDouble() : data['weight']) ?? 0.0,
+    List.from(data['lastWorkoutSessions']),
+    List.from(data['routines']),
+    List.generate(
+      data['savedExercises'].length,
+      (i) => Exercise.fromMap(
+        data['savedExercises'][i]['name'],
+        data['savedExercises'][i]['type'],
+        data['savedExercises'][i]['sets'],
+      ),
+    ),
+  );
+}
+
 
   Map<String, dynamic> toFirestore() {
     return {
