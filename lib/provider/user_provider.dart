@@ -19,6 +19,7 @@ class UserProvider extends ChangeNotifier {
   final _lastSessions = <WorkoutSession>[];
   List<WorkoutSession> get lastSessions => _lastSessions;
   List<WorkoutSession>? _allSessions;
+  List<WorkoutSession>? get allSessions => _allSessions;
   final _routines = <Routine>[];
   List<Routine> get routines => _routines;
 
@@ -37,7 +38,10 @@ class UserProvider extends ChangeNotifier {
       print("Error writing document: $e");
       result = -1;
     });
-    if (result == 0) notifyListeners();
+    if (result == 0) {
+      notifyListeners();
+      await _addSampleData(); // TODO: remove
+    }
     return result;
   }
 
@@ -74,6 +78,10 @@ class UserProvider extends ChangeNotifier {
       }
     }
     notifyListeners();
+    // TODO: for testing
+    if (_lastSessions.isEmpty) {
+      await _addSampleData();
+    }
     return result;
   }
 
@@ -125,9 +133,13 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<WorkoutSession> addWorkoutSession(
-      Timestamp start, Timestamp end, List<Exercise> exercises) async {
+      DateTime start, DateTime end, List<Exercise> exercises) async {
     assert(_userRef != null, 'User is not initialized');
-    final session = WorkoutSession(_userRef!.id, start, end, exercises);
+    final startTime =
+            Timestamp.fromMillisecondsSinceEpoch(start.millisecondsSinceEpoch),
+        endTime =
+            Timestamp.fromMillisecondsSinceEpoch(end.millisecondsSinceEpoch);
+    final session = WorkoutSession(_userRef!.id, startTime, endTime, exercises);
     _lastSessions.add(session);
     if (_allSessions != null) {
       _allSessions!.add(session);
@@ -170,5 +182,19 @@ class UserProvider extends ChangeNotifier {
       'routines': FieldValue.arrayUnion([routineRef.id]),
     });
     return routine;
+  }
+
+  Future<void> _addSampleData() async {
+    for (int i = 0; i < 15; i++) {
+      final start = DateTime.now(), end = start.add(const Duration(minutes: 2));
+      final exercises =
+          List.generate(1, (_) => Exercise.init('push up', null, 1, 12, 50));
+      await addWorkoutSession(start, end, exercises);
+    }
+    for (int i = 0; i < 5; i++) {
+      final exercises =
+          List.generate(1, (_) => Exercise.init('push up', null, 1, 12, 50));
+      await addRoutine('routine $i', exercises);
+    }
   }
 }

@@ -21,7 +21,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _redirected = false;
-  bool _gotRoutine = false;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +47,7 @@ class _HomePageState extends State<HomePage> {
                 _redirected = false;
               }),
         ],
-        iconTheme: const IconThemeData(color: Colors.white), 
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: ListView(
         children: <Widget>[
@@ -72,51 +71,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-    );
-  }
-
-  /// TODO: testing widget to be remove in pord
-  Widget _userInfoBuilder(BuildContext context, UserProvider userProvider, _) {
-    if (userProvider.user == null) {
-      return const Text('User is not initialized');
-    }
-    User user = userProvider.user!;
-    final exercises =
-        List.generate(1, (_) => Exercise.init('name', 'type', 1, 12, 50));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('User: ${user.toFirestore()}'),
-        OutlinedButton(
-          onPressed: () => userProvider.addWorkoutSession(
-              Timestamp.now(), Timestamp.now(), exercises),
-          child: const Text('add workout session'),
-        ),
-        Text('Workout sessions: ${userProvider.lastSessions}'),
-        Row(
-          children: [
-            Visibility(
-              visible: _gotRoutine,
-              child: OutlinedButton(
-                onPressed: () => userProvider.addRoutine('name', exercises),
-                child: const Text('add routine'),
-              ),
-            ),
-            Visibility(
-              visible: !_gotRoutine,
-              child: OutlinedButton(
-                onPressed: () {
-                  userProvider.getRoutines();
-                  _gotRoutine = true;
-                },
-                child: const Text('get routine'),
-              ),
-            ),
-          ],
-        ),
-        Text('Routines: ${userProvider.routines}'),
-      ],
     );
   }
 }
