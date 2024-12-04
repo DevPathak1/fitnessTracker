@@ -168,41 +168,22 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<Routine> addRoutine(String name, List<Exercise> exercises) async {
-  assert(_userRef != null, 'User is not initialized');
-  
-  // Temporarily create a routine without the ID
-  final routineData = {
-    'userId': _userRef!.id,
-    'name': name,
-    'exercises': exercises.map((e) => e.toFirestore()).toList(),
-  };
-
-  // Add the routine to Firestore
-  final routineRef = await _db
-      .collection('routine')
-      .add(routineData);
-
-  // Create the routine object with the ID
-  final routine = Routine(
-    _userRef!.id,
-    routineRef.id,
-    name,
-    exercises,
-  );
-
-  // Update local state
-  _routines.add(routine);
-  _user!.routines.add(routine.id);
-
-  // Update Firestore with the new routine ID
-  await _userRef!.update({
-    'routines': FieldValue.arrayUnion([routine.id]),
-  });
-
-  notifyListeners();
-  return routine;
-}
-
+    assert(_userRef != null, 'User is not initialized');
+    final routineRef = _db
+        .collection('routine')
+        .withConverter(
+            fromFirestore: Routine.fromFirestore,
+            toFirestore: (Routine routine, options) => routine.toFirestore())
+        .doc();
+    final routine = Routine(_userRef!.id, routineRef.id, name, exercises);
+    _routines.add(routine);
+    notifyListeners();
+    await routineRef.set(routine);
+    await _userRef!.update({
+      'routines': FieldValue.arrayUnion([routineRef.id]),
+    });
+    return routine;
+  }
 
   Future<void> _addSampleData() async {
     for (int i = 0; i < 15; i++) {
@@ -230,8 +211,9 @@ class UserProvider extends ChangeNotifier {
     _user!.routines.remove(routine.id);
 
     // Update user document
-    await _userRef!.update({'routines': _user!.routines});
+    await _userRef!.update({
+      'routines': FieldValue.arrayRemove([routine.id])
+    });
     notifyListeners();
   }
-
 }

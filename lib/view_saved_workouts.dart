@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:fitness_tracker/provider/user_provider.dart';
 import 'package:fitness_tracker/entity/routine.dart';
 import 'package:go_router/go_router.dart';
+
 class ViewSavedWorkoutsPage extends StatelessWidget {
   const ViewSavedWorkoutsPage({super.key});
 
@@ -20,6 +21,7 @@ class ViewSavedWorkoutsPage extends StatelessWidget {
       ),
       body: Consumer<UserProvider>(
         builder: (context, userProvider, child) {
+          userProvider.getRoutines();
           final routines = userProvider.routines;
           if (routines.isEmpty) {
             return const Center(
@@ -72,7 +74,9 @@ class ViewSavedWorkoutsPage extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...routine.exercises.map((exercise) => Text(exercise.name)).toList(),
+              ...routine.exercises
+                  .map((exercise) => Text(exercise.name))
+                  .toList(),
             ],
           ),
           actions: [
@@ -84,12 +88,14 @@ class ViewSavedWorkoutsPage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                final userProvider =
+                    Provider.of<UserProvider>(context, listen: false);
 
                 // Add the workout session
                 final workoutSession = await userProvider.addWorkoutSession(
                   DateTime.now(),
-                  DateTime.now().add(const Duration(hours: 1)), // Default duration
+                  DateTime.now()
+                      .add(const Duration(hours: 1)), // Default duration
                   routine.exercises,
                 );
                 Navigator.pop(context); // Close the popup
@@ -107,11 +113,13 @@ class ViewSavedWorkoutsPage extends StatelessWidget {
             ),
             TextButton(
               onPressed: () async {
-                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                final userProvider =
+                    Provider.of<UserProvider>(context, listen: false);
                 await userProvider.deleteRoutine(routine, index);
                 Navigator.pop(context); // Close the popup
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Routine deleted successfully!')),
+                  const SnackBar(
+                      content: Text('Routine deleted successfully!')),
                 );
               },
               child: const Text(

@@ -25,7 +25,6 @@ class Routine extends Session {
     );
   }
 
-  @override
   Map<String, dynamic> toFirestore() {
     return {
       'userId': userId,
