@@ -29,7 +29,7 @@ class _ViewSavedWorkoutsPage extends State<ViewSavedWorkoutsPage> {
       ),
       body: Consumer<UserProvider>(
         builder: (context, userProvider, child) {
-          if (!_gotRoutines) {
+          if (!_gotRoutines && userProvider.routines.isEmpty) {
             userProvider.getRoutines();
             _gotRoutines = true;
           }
