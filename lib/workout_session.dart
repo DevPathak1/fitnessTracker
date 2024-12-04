@@ -206,6 +206,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
