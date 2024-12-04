@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_tracker/provider/user_provider.dart';
 import 'package:fitness_tracker/entity/routine.dart';
+import 'package:fitness_tracker/entity/exercise.dart';
 import 'package:go_router/go_router.dart';
 
 class ViewSavedWorkoutsPage extends StatelessWidget {
@@ -91,23 +92,54 @@ class ViewSavedWorkoutsPage extends StatelessWidget {
                 final userProvider =
                     Provider.of<UserProvider>(context, listen: false);
 
-                // Add the workout session
-                final workoutSession = await userProvider.addWorkoutSession(
-                  DateTime.now(),
-                  DateTime.now()
-                      .add(const Duration(hours: 1)), // Default duration
-                  routine.exercises,
-                );
-                Navigator.pop(context); // Close the popup
+                try {
+                  // Fetch the full routine details from Firestore
+                  final routineSnapshot = await FirebaseFirestore.instance
+                      .collection('routine')
+                      .doc(routine.id)
+                      .get();
 
-                // Navigate to the workout session page with GoRouter
-                GoRouter.of(context).push(
-                  '/workout_session',
-                  extra: {
-                    'session': workoutSession,
-                    'initialExercises': routine.exercises,
-                  },
-                );
+                  if (routineSnapshot.exists) {
+                    final routineData = routineSnapshot.data()!;
+                    final List<dynamic> exercisesData =
+                        routineData['exercises'];
+                    final exercises = exercisesData.map((e) {
+                      return Exercise.fromMap(e['name'], e['type'], e['sets']);
+                    }).toList();
+
+                    // Add the workout session
+                    final workoutSession = await userProvider.addWorkoutSession(
+                      DateTime.now(),
+                      DateTime.now()
+                          .add(const Duration(hours: 1)), // Default duration
+                      exercises,
+                    );
+                    Navigator.pop(context); // Close the popup
+
+                    // Navigate to the workout session page with GoRouter
+                    GoRouter.of(context).push(
+                      '/workout_session',
+                      extra: {
+                        'session': workoutSession,
+                        'initialExercises': exercises,
+                      },
+                    );
+                    print(
+                        "Navigating to workout session with exercises: ${exercises.map((e) => e.name).toList()}");
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Failed to load routine details.')),
+                    );
+                  }
+                } catch (e) {
+                  print('Error fetching routine: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'An error occurred while loading the routine.')),
+                  );
+                }
               },
               child: const Text('Start Workout'),
             ),

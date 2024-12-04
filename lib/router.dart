@@ -4,12 +4,12 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:provider/provider.dart';
 
 import 'home_page.dart';
-import 'view_saved_workouts.dart'; // Add your new pages here
+import 'view_saved_workouts.dart';
 import 'workout_session.dart';
 import 'view_workout_history.dart';
 import 'provider/user_provider.dart';
 import 'widget/wait_firebase_init.dart';
-import 'package:fitness_tracker/entity/exercise.dart'; // Adjust the path as needed
+import 'package:fitness_tracker/entity/exercise.dart'; 
 
 
 void _handleAuthStateChange(BuildContext context, AuthState state) {
@@ -106,12 +106,12 @@ final router = GoRouter(
           path: 'workout_session',
           builder: (context, state) {
             final args = state.extra as Map<String, dynamic>?;
-
             return WorkoutSessionPage(
-              initialExercises: args?['initialExercises'] as List<Exercise>?, // Pass initial exercises
+              initialExercises: args?['initialExercises'] as List<Exercise>?, // Pass the initial exercises
             );
           },
         ),
+
         // GoRoute(
         //   path: 'view_workout_history',
         //   builder: (context, state) => const ViewWorkoutHistoryPage(),
