@@ -65,6 +65,7 @@ class _HomePageState extends State<HomePage> {
           ),
           ElevatedButton(
             onPressed: () {
+              print("Navigating to view workout history...");
               context.push('/view_workout_history');
             },
             child: const Text('View Workout History'),

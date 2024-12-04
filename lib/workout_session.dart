@@ -25,7 +25,6 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize exercises with the provided initial exercises or an empty list
     exercises = widget.initialExercises ?? [];
     print("Loaded exercises: ${exercises.map((e) => e.name).toList()}");
   }
@@ -64,6 +63,121 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
 
     return allExercises;
   }
+
+  void _showExerciseDetailsDialog(Exercise exercise) {
+  // Create a copy of the sets list to avoid modifying the original until the user is done
+  List<ExerciseSet> sets = List.from(exercise.sets);
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(builder: (context, setState) {
+        return AlertDialog(
+          title: Text('Track ${exercise.name}'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Add Sets:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                // Using Column with map instead of ListView.builder to avoid viewport issues
+                Column(
+                  children: sets.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final set = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: set.weight.toString(),
+                              decoration: const InputDecoration(
+                                labelText: 'Weight',
+                                labelStyle: TextStyle(color: Colors.pink),
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                setState(() {
+                                  set.weight = double.tryParse(value) ?? 0.0;
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: set.reps.toString(),
+                              decoration: const InputDecoration(
+                                labelText: 'Reps',
+                                labelStyle: TextStyle(color: Colors.pink),
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                setState(() {
+                                  set.reps = int.tryParse(value) ?? 0;
+                                });
+                              },
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                sets.removeAt(index);
+                              });
+                            },
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      // Add a new set with default values
+                      sets.add(ExerciseSet(10, 0.0));
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
+                  child: const Text('Add Set'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  // Update the original exercise's sets with the new values
+                  exercise.sets.clear();
+                  exercise.sets.addAll(sets);
+                });
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              child: const Text('Done'),
+            ),
+          ],
+        );
+      });
+    },
+  );
+}
+
 
   void _showAddExerciseDialog() {
     String? selectedExercise;
@@ -164,19 +278,64 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     );
   }
 
-  void _saveWorkoutSession() async {
-    if (exercises.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No exercises to save. Add exercises first.'),
-        ),
-      );
-      return;
-    }
+  void _showNameDialog(BuildContext context, Function(String) onSave) {
+  String routineName = '';
 
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Save Workout Routine'),
+        content: TextField(
+          onChanged: (value) {
+            routineName = value;
+          },
+          decoration: const InputDecoration(
+            hintText: 'Enter routine name',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (routineName.isNotEmpty) {
+                onSave(routineName);
+                Navigator.pop(context);
+              } else {
+                // Show a warning to provide a name
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a routine name.'),
+                  ),
+                );
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _saveWorkoutSession() async {
+  if (exercises.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('No exercises to save. Add exercises first.'),
+      ),
+    );
+    return;
+  }
+
+  _showNameDialog(context, (routineName) async {
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final routineName = 'Routine ${DateTime.now().toIso8601String()}';
 
       await userProvider.addRoutine(routineName, exercises);
 
@@ -195,7 +354,9 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
         ),
       );
     }
-  }
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -230,6 +391,9 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                   ),
                   leading: const Icon(Icons.fitness_center, color: Colors.pink),
                   tileColor: Colors.grey[800],
+                  onTap: () {
+                    _showExerciseDetailsDialog(exercise);
+                  },
                 );
               },
             ),
@@ -251,7 +415,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                 onPressed: _saveWorkoutSession,
                 label: const Text("Save Workout"),
                 icon: const Icon(Icons.save),
-                backgroundColor: Colors.green,      
+                backgroundColor: Colors.green,
               ),
             ],
           ),
@@ -262,4 +426,3 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     );
   }
 }
-

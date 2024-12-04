@@ -30,8 +30,8 @@ class Exercise {
 }
 
 class ExerciseSet {
-  final int reps;
-  final double weight;
+  int reps;
+  double weight;
 
   ExerciseSet(this.reps, this.weight);
 

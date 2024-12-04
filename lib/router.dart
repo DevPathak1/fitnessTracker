@@ -111,14 +111,10 @@ final router = GoRouter(
             );
           },
         ),
-
-        // GoRoute(
-        //   path: 'view_workout_history',
-        //   builder: (context, state) => const ViewWorkoutHistoryPage(),
-        // ),
-        // GoRoute(
-        //   path: 'track_each_exercise',
-        //   builder: (context, state) => const TrackEachExercisePage(),
+        GoRoute(
+          path: 'view_workout_history',
+          builder: (context, state) => const ViewWorkoutHistoryPage(),
+        ),
       ],
     ),
   ],
