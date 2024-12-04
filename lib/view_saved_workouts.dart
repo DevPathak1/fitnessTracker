@@ -6,8 +6,15 @@ import 'package:fitness_tracker/entity/routine.dart';
 import 'package:fitness_tracker/entity/exercise.dart';
 import 'package:go_router/go_router.dart';
 
-class ViewSavedWorkoutsPage extends StatelessWidget {
+class ViewSavedWorkoutsPage extends StatefulWidget {
   const ViewSavedWorkoutsPage({super.key});
+
+  @override
+  State<ViewSavedWorkoutsPage> createState() => _ViewSavedWorkoutsPage();
+}
+
+class _ViewSavedWorkoutsPage extends State<ViewSavedWorkoutsPage> {
+  bool _gotRoutines = false;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +29,10 @@ class ViewSavedWorkoutsPage extends StatelessWidget {
       ),
       body: Consumer<UserProvider>(
         builder: (context, userProvider, child) {
-          userProvider.getRoutines();
+          if (!_gotRoutines) {
+            userProvider.getRoutines();
+            _gotRoutines = true;
+          }
           final routines = userProvider.routines;
           if (routines.isEmpty) {
             return const Center(
