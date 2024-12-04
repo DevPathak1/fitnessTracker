@@ -3,11 +3,13 @@ import 'session.dart';
 import 'exercise.dart';
 
 class Routine extends Session {
+  final String id; // Firestore document ID
   final String name;
 
-  Routine(String userId, this.name, List<Exercise> exercises)
+  Routine(String userId, this.id, this.name, List<Exercise> exercises)
       : super(userId, exercises);
-  Routine.fromMap(String userId, this.name, List<dynamic> exercises)
+
+  Routine.fromMap(String userId, this.id, this.name, List<dynamic> exercises)
       : super.fromMap(userId, exercises);
 
   factory Routine.fromFirestore(
@@ -15,9 +17,15 @@ class Routine extends Session {
     SnapshotOptions? options,
   ) {
     final data = snapshot.data()!;
-    return Routine.fromMap(data['userId'], data['name'], data['exercises']);
+    return Routine.fromMap(
+      data['userId'],
+      snapshot.id, // Set the document ID
+      data['name'],
+      data['exercises'],
+    );
   }
 
+  @override
   Map<String, dynamic> toFirestore() {
     return {
       'userId': userId,

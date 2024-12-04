@@ -52,4 +52,6 @@ firebase.json
 # Dev related
 devtools_options.yaml
 
-/lib/rapidapikey.dart
+#api key
+lib/rapidapikey.dart
+lib/rapidapikey.dart

@@ -32,10 +32,11 @@ class User {
     data['age'],
     (data['height'] is int ? data['height'].toDouble() : data['height']) ?? 0.0,
     (data['weight'] is int ? data['weight'].toDouble() : data['weight']) ?? 0.0,
-    List.from(data['lastWorkoutSessions']),
-    List.from(data['routines']),
+    List<String>.from(data['lastWorkoutSessions'] ?? []), // Ensure proper type
+    // Updated to directly cast to List<String>
+    List<String>.from(data['routines'] ?? []),
     List.generate(
-      data['savedExercises'].length,
+      (data['savedExercises'] as List).length,
       (i) => Exercise.fromMap(
         data['savedExercises'][i]['name'],
         data['savedExercises'][i]['type'],
@@ -44,6 +45,8 @@ class User {
     ),
   );
 }
+
+
 
 
   Map<String, dynamic> toFirestore() {

@@ -9,6 +9,8 @@ import 'workout_session.dart';
 import 'view_workout_history.dart';
 import 'provider/user_provider.dart';
 import 'widget/wait_firebase_init.dart';
+import 'package:fitness_tracker/entity/exercise.dart'; // Adjust the path as needed
+
 
 void _handleAuthStateChange(BuildContext context, AuthState state) {
   final user = switch (state) {
@@ -102,7 +104,13 @@ final router = GoRouter(
         ),
         GoRoute(
           path: 'workout_session',
-          builder: (context, state) => const WorkoutSessionPage(),
+          builder: (context, state) {
+            final args = state.extra as Map<String, dynamic>?;
+
+            return WorkoutSessionPage(
+              initialExercises: args?['initialExercises'] as List<Exercise>?, // Pass initial exercises
+            );
+          },
         ),
         // GoRoute(
         //   path: 'view_workout_history',
