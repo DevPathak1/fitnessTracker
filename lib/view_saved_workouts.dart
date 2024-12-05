@@ -85,9 +85,14 @@ class _ViewSavedWorkoutsPage extends State<ViewSavedWorkoutsPage> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...routine.exercises
-                  .map((exercise) => Text(exercise.name))
-                  .toList(),
+              ...routine.exercises.map((exercise) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Text(
+                        exercise.name,
+                        style: const TextStyle(color: Colors.black),
+                      ),
+              )
+              )
             ],
           ),
           actions: [
